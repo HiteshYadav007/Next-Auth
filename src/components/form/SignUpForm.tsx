@@ -15,6 +15,10 @@ import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import Link from 'next/link';
 import GoogleSignInButton from '../GoogleSignInButton';
+import axios from 'axios';
+import { useRouter } from 'next/navigation';
+import { useToast } from "@/components/ui/use-toast"
+
 
 const FormSchema = z
   .object({
@@ -32,6 +36,8 @@ const FormSchema = z
   });
 
 const SignUpForm = () => {
+  const router = useRouter();
+  const { toast } = useToast();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -41,9 +47,20 @@ const SignUpForm = () => {
       confirmPassword: '',
     },
   });
+  
+  const onSubmit = async(values: z.infer<typeof FormSchema>) => {
 
-  const onSubmit = (values: z.infer<typeof FormSchema>) => {
-    console.log(values);
+    const response = await axios.post('api/user',values);
+    if(response.status === 201){
+        router.push('/sign-in');
+    }else {
+      toast({
+        title: "Error !!",
+        description: "Oops Something went wrong !",
+        variant:'destructive'
+      })
+    }
+
   };
 
   return (
